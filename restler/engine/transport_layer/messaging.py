@@ -208,7 +208,11 @@ class HttpSock(object):
             if len(buf) == 0:
                 return data
 
-            data += buf.decode(UTF8)
+            try:
+                data += buf.decode(UTF8)
+            except Exception as ex:
+                RAW_LOGGING(f'Failed to decode header data due to {ex} when decoding {buf}')
+                raise ex
 
         # Handle chunk encoding
         chuncked_encoding = False
@@ -226,7 +230,11 @@ class HttpSock(object):
                 if len(buf) == 0:
                     return data
 
-                data += buf.decode(UTF8)
+                try:
+                    data += buf.decode(UTF8)
+                except Exception as ex:
+                    RAW_LOGGING(f'Failed to decode chunk encoding data due to {ex} when decoding {buf}')
+                    raise ex
                 if data.endswith(DELIM):
                     return data
 
@@ -255,7 +263,11 @@ class HttpSock(object):
                 return data
 
             bytes_remain -= len(buf)
-            data += buf.decode(UTF8)
+            try:
+                data += buf.decode(UTF8)
+            except Exception as ex:
+                RAW_LOGGING(f'Failed to decode rest of socket data due to {ex} when decoding {buf}')
+                raise ex
 
         return data
 
