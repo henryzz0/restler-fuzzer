@@ -211,8 +211,10 @@ class HttpSock(object):
             try:
                 data += buf.decode(UTF8)
             except Exception as ex:
-                RAW_LOGGING(f'Failed to decode header data due to {ex} when decoding {buf}')
-                raise ex
+                RAW_LOGGING(f'Failed to decode header data due to {ex} \
+                    when decoding received bytes. \
+                    Trying again and ignoring offending bytes.')
+                data += buf.decode(UTF8, "ignore")
 
         # Handle chunk encoding
         chuncked_encoding = False
@@ -233,8 +235,10 @@ class HttpSock(object):
                 try:
                     data += buf.decode(UTF8)
                 except Exception as ex:
-                    RAW_LOGGING(f'Failed to decode chunk encoding data due to {ex} when decoding {buf}')
-                    raise ex
+                    RAW_LOGGING(f'Failed to decode chunk encoding data due to {ex}. \
+                        Trying again while ignoring offending bytes.')
+                    data += buf.decode(UTF8, "ignore")
+
                 if data.endswith(DELIM):
                     return data
 
@@ -266,8 +270,9 @@ class HttpSock(object):
             try:
                 data += buf.decode(UTF8)
             except Exception as ex:
-                RAW_LOGGING(f'Failed to decode rest of socket data due to {ex} when decoding {buf}')
-                raise ex
+                RAW_LOGGING(f'Failed to decode rest of socket data due to {ex}. \
+                    Trying again while ignoring offending bytes.')
+                data += buf.decode(UTF8, "ignore")
 
         return data
 
